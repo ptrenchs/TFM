@@ -3,17 +3,37 @@ import numpy as np
 
 lista_areas = []
 
-img = cv2.imread('/home/pol-trenchs/Escritorio/TFM/imagenes/puntos_0365.jpg')
+img = cv2.imread('/home/ptrenchs/Escritorio/TFM/imagenes/puntos_0365.jpg')
 filas,columnas,calnales = img.shape
 # img = cv2.resize(img, (columnas * 2, filas * 2))
 img = cv2.blur(img, (5,5))
 
 # Aplicando Canny
 canny = cv2.Canny(img, 20, 100)
+# cv2.imshow('canny', cv2.resize(canny, (columnas // 2, filas // 2)))
 # Aplicacion closing
-kernel = np.ones((15,15))
-closing = cv2.morphologyEx(canny, cv2.MORPH_CLOSE, kernel)
-contornos,_ = cv2.findContours(closing, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+contornos = []
+n = 10
+cont = 0
+while True:
+    kernel = np.ones((n,n))
+    closing = cv2.morphologyEx(canny, cv2.MORPH_CLOSE, kernel)
+    closing_copy = closing.copy()
+    contornos_frame,_ = cv2.findContours(closing, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(closing_copy, contornos_frame, -1, (0,255,0), 2)
+    closing_copy = cv2.resize(closing_copy, (columnas // 2, filas // 2))
+    cv2.imshow('closing', closing_copy)
+
+    if len(contornos_frame) == len(contornos):
+        cont += 1
+        if cont<10:
+            n += 2 
+    else:
+        cont = 0
+        n += 2
+    contornos = contornos_frame
+    if 10 < cont:
+        break
 
 esquina_superior_iz = []
 esquina_complementaria = []
